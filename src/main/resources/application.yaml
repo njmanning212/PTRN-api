@@ -23,3 +23,5 @@ token:
   expiration: 86400000 # 1 day
   refresh-token:
     expiration: 604800000 # 7 days
+
+spring.config.import: file:env.properties
