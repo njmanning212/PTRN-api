@@ -8,5 +8,5 @@ import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 public interface AuthenticationService {
     JwtAuthenticationResponse signUp(SignUpRequest request);
     JwtAuthenticationResponse signIn(SignInRequest request);
-    void changePassword(String email, ChangePasswordRequest request);
+    String changePassword(String email, ChangePasswordRequest request);
 }

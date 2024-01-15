@@ -1,13 +1,16 @@
 package com.njman.ptrnapi.controllers;
 
+import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
 import com.njman.ptrnapi.daos.requests.SignInRequest;
 import com.njman.ptrnapi.daos.requests.SignUpRequest;
 import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
+import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.services.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,5 +30,11 @@ public class AuthenticationController {
     @PostMapping("/signin")
     public ResponseEntity<JwtAuthenticationResponse> signIn(@RequestBody SignInRequest request) {
         return ResponseEntity.ok(authenticationService.signIn(request));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordRequest request) {
+        var email = user.getEmail();
+        return ResponseEntity.ok(authenticationService.changePassword(email, request));
     }
 }

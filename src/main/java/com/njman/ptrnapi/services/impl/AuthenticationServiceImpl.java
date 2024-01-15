@@ -72,15 +72,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void changePassword(String email, ChangePasswordRequest request) {
+    public String changePassword(String email, ChangePasswordRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, request.getOldPassword()));
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
         if (request.getNewPassword().equals(request.getOldPassword()))
-            throw new IllegalArgumentException("New password cannot be the same as old password.");
+            return "New password cannot be the same as old password.";
         if (!request.getNewPassword().equals(request.getNewPasswordConfirm()))
-            throw new IllegalArgumentException("New password and new password confirmation do not match.");
+            return "New passwords do not match.";
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return "Password changed successfully.";
     }
 }
