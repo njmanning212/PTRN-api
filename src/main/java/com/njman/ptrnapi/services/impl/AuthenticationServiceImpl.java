@@ -1,5 +1,6 @@
 package com.njman.ptrnapi.services.impl;
 
+import com.njman.ptrnapi.daos.requests.AdminSignUpRequest;
 import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
 import com.njman.ptrnapi.daos.requests.SignInRequest;
 import com.njman.ptrnapi.daos.requests.SignUpRequest;
@@ -64,6 +65,34 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse
+                .builder()
+                .token(jwt)
+                .build();
+    }
+
+    @Override
+    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) {
+        var user = User
+                .builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        var profile = Profile
+                .builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .role(Role.ADMIN)
+                .user(user)
+                .build();
+
+        user.setProfile(profile);
+
+        userRepository.save(user);
+        profileRepository.save(profile);
+
         var jwt = jwtService.generateToken(user);
         return JwtAuthenticationResponse
                 .builder()

@@ -24,4 +24,8 @@ token:
   refresh-token:
     expiration: 604800000 # 7 days
 
+admin:
+  code: ${ADMIN_CODE}
+
 spring.config.import: file:env.properties
+
