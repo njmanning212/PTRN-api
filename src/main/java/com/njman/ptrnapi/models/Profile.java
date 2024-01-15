@@ -1,4 +1,4 @@
-package models;
+package com.njman.ptrnapi.models;
 
 import jakarta.persistence.*;
 

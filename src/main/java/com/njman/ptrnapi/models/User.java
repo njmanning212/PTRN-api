@@ -1,4 +1,4 @@
-package models;
+package com.njman.ptrnapi.models;
 
 import jakarta.persistence.*;
 
@@ -35,7 +35,6 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        //return the mail as that is what we will use as the username
         return email;
     }
 

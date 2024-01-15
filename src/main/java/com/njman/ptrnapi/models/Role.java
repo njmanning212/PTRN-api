@@ -1,4 +1,4 @@
-package models;
+package com.njman.ptrnapi.models;
 
 public enum Role {
     ADMIN(500),
