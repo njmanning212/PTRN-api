@@ -15,6 +15,7 @@ import com.njman.ptrnapi.services.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    @Value("${admin.code}")
+    private String adminCode;
 
 
     @Override
@@ -44,31 +47,41 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (existingUser.isPresent()) {
             throw new RuntimeException("Email already in use.");
         }
+        try {
+            var user = User
+                    .builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .build();
 
-        var user = User
-                .builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
+            var profile = Profile
+                    .builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .user(user)
+                    .role(Role.PATIENT)
+                    .build();
 
-        var profile = Profile
-                .builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .user(user)
-                .role(Role.PATIENT)
-                .build();
+            user.setProfile(profile);
 
-        user.setProfile(profile);
+            userRepository.save(user);
+            profileRepository.save(profile);
 
-        userRepository.save(user);
-        profileRepository.save(profile);
+            var jwt = jwtService.generateToken(user);
+            return JwtAuthenticationResponse
+                    .builder()
+                    .token(jwt)
+                    .build();
+        }
+        catch (Exception e) {
+            Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
+            if (existingUser2.isPresent()) {
+                profileRepository.delete(existingUser2.get().getProfile());
+                userRepository.delete(existingUser2.get());
+            }
+            throw new RuntimeException("Error signing up.");
+        }
 
-        var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse
-                .builder()
-                .token(jwt)
-                .build();
 
     }
 
@@ -87,30 +100,54 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) {
-        var user = User
-                .builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
+        if (!request.getAdminCode().equals(adminCode)) {
+            throw new RuntimeException("Invalid admin code.");
+        }
 
-        var profile = Profile
-                .builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .role(Role.ADMIN)
-                .user(user)
-                .build();
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Passwords do not match.");
+        }
 
-        user.setProfile(profile);
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("Email already in use.");
+        }
 
-        userRepository.save(user);
-        profileRepository.save(profile);
+        try {
+            var user = User
+                    .builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .build();
 
-        var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse
-                .builder()
-                .token(jwt)
-                .build();
+            var profile = Profile
+                    .builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .role(Role.ADMIN)
+                    .user(user)
+                    .build();
+
+            user.setProfile(profile);
+
+            userRepository.save(user);
+            profileRepository.save(profile);
+
+            var jwt = jwtService.generateToken(user);
+            return JwtAuthenticationResponse
+                    .builder()
+                    .token(jwt)
+                    .build();
+
+        } catch (Exception e) {
+            Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
+            if (existingUser2.isPresent()) {
+                profileRepository.delete(existingUser2.get().getProfile());
+                userRepository.delete(existingUser2.get());
+            }
+            throw new RuntimeException("Error signing up admin.");
+        }
+
     }
 
     @Override

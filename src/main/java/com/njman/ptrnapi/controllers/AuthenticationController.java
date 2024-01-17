@@ -24,15 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-    @Value("${admin.code}")
-    private String adminCode;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
         try {
             return ResponseEntity.ok(authenticationService.signUp(request));
         } catch (Exception e) {
-            new ErrorResponse(e.getMessage());
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
@@ -49,14 +46,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("signup/admin")
-    public ResponseEntity<JwtAuthenticationResponse> adminSignUp(@RequestBody AdminSignUpRequest request) {
-        if (!request.getAdminCode().equals(adminCode)) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> adminSignUp(@RequestBody AdminSignUpRequest request) {
+        try {
+            return ResponseEntity.ok(authenticationService.adminSignUp(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(authenticationService.adminSignUp(request));
     }
 
 }
