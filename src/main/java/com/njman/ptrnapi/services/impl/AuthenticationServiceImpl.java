@@ -15,6 +15,7 @@ import com.njman.ptrnapi.services.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -86,27 +87,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public JwtAuthenticationResponse signIn(SignInRequest request) {
+    public JwtAuthenticationResponse signIn(SignInRequest request) throws BadRequestException {
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         }
         catch (Exception e) {
-            throw new RuntimeException("Invalid email or password.");
+            throw new BadRequestException("Invalid password.");
         }
 
-        try {
-            var user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            var jwt = jwtService.generateToken(user);
-            return JwtAuthenticationResponse
-                    .builder()
-                    .token(jwt)
-                    .build();
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Error signing in.");
-        }
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse
+                .builder()
+                .token(jwt)
+                .build();
     }
 
     @Override
