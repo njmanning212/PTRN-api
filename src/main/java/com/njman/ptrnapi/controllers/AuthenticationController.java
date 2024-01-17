@@ -4,6 +4,7 @@ import com.njman.ptrnapi.daos.requests.AdminSignUpRequest;
 import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
 import com.njman.ptrnapi.daos.requests.SignInRequest;
 import com.njman.ptrnapi.daos.requests.SignUpRequest;
+import com.njman.ptrnapi.daos.responses.ErrorResponse;
 import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.services.AuthenticationService;
@@ -27,11 +28,13 @@ public class AuthenticationController {
     private String adminCode;
 
     @PostMapping("/signup")
-    public ResponseEntity<JwtAuthenticationResponse> signUp(@RequestBody SignUpRequest request) {
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
+        try {
+            return ResponseEntity.ok(authenticationService.signUp(request));
+        } catch (Exception e) {
+            new ErrorResponse(e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
-        return ResponseEntity.ok(authenticationService.signUp(request));
     }
 
     @PostMapping("/signin")
