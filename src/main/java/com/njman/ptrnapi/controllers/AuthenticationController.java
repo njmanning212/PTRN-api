@@ -35,8 +35,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtAuthenticationResponse> signIn(@RequestBody SignInRequest request) {
-        return ResponseEntity.ok(authenticationService.signIn(request));
+    public ResponseEntity<?> signIn(@RequestBody SignInRequest request) {
+        try {
+            return ResponseEntity.ok(authenticationService.signIn(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     @PostMapping("/change-password")
