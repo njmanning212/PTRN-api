@@ -10,6 +10,6 @@ import org.apache.coyote.BadRequestException;
 public interface AuthenticationService {
     JwtAuthenticationResponse signUp(SignUpRequest request) throws BadRequestException;
     JwtAuthenticationResponse signIn(SignInRequest request) throws BadRequestException;
-    JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request);
+    JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) throws BadRequestException;
     String changePassword(String email, ChangePasswordRequest request);
 }

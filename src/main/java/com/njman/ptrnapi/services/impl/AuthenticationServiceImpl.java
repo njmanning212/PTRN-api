@@ -102,18 +102,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) {
+    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) throws BadRequestException {
         if (!request.getAdminCode().equals(adminCode)) {
-            throw new RuntimeException("Invalid admin code.");
+            throw new BadRequestException("Invalid admin code.");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match.");
+            throw new BadRequestException("Passwords do not match.");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("Email already in use.");
+            throw new BadRequestException("Email already in use.");
         }
 
         try {
@@ -145,10 +145,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (Exception e) {
             Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
             if (existingUser2.isPresent()) {
-                profileRepository.delete(existingUser2.get().getProfile());
+                if (existingUser2.get().getProfile() != null)
+                    profileRepository.delete(existingUser2.get().getProfile());
                 userRepository.delete(existingUser2.get());
             }
-            throw new RuntimeException("Error signing up admin.");
+            throw new RuntimeException(e.getMessage());
         }
 
     }

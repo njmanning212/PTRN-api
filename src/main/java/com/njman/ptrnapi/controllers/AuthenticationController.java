@@ -12,7 +12,6 @@ import com.njman.ptrnapi.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("ptrn/api/auth")
@@ -28,57 +28,50 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
+    public JwtAuthenticationResponse signUp(@RequestBody SignUpRequest request) {
         try {
-            return ResponseEntity.ok(authenticationService.signUp(request));
+            return authenticationService.signUp(request);
         }
         catch (BadRequestException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@RequestBody SignInRequest request) {
+    public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request) {
         try {
-            return ResponseEntity.ok(authenticationService.signIn(request));
+            return authenticationService.signIn(request);
         }
         catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
         catch (BadRequestException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("Internal server error"));
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordRequest request) {
+    public String changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordRequest request) {
         var email = user.getEmail();
-        return ResponseEntity.ok(authenticationService.changePassword(email, request));
+        return authenticationService.changePassword(email, request);
     }
 
     @PostMapping("signup/admin")
-    public ResponseEntity<?> adminSignUp(@RequestBody AdminSignUpRequest request) {
+    public JwtAuthenticationResponse adminSignUp(@RequestBody AdminSignUpRequest request) {
         try {
-            return ResponseEntity.ok(authenticationService.adminSignUp(request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+            return authenticationService.adminSignUp(request);
+        }
+        catch (BadRequestException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
-
 }
