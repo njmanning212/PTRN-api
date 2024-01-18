@@ -31,8 +31,16 @@ public class AuthenticationController {
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
         try {
             return ResponseEntity.ok(authenticationService.signUp(request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+        catch (BadRequestException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
+        catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -54,7 +62,7 @@ public class AuthenticationController {
         catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("Sign in failed."));
+                    .body(new ErrorResponse("Internal server error"));
         }
     }
 

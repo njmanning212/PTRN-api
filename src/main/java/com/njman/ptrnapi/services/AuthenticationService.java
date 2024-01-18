@@ -8,7 +8,7 @@ import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 import org.apache.coyote.BadRequestException;
 
 public interface AuthenticationService {
-    JwtAuthenticationResponse signUp(SignUpRequest request);
+    JwtAuthenticationResponse signUp(SignUpRequest request) throws BadRequestException;
     JwtAuthenticationResponse signIn(SignInRequest request) throws BadRequestException;
     JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request);
     String changePassword(String email, ChangePasswordRequest request);

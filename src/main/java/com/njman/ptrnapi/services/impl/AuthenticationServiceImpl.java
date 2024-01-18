@@ -38,15 +38,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public JwtAuthenticationResponse signUp(SignUpRequest request) {
+    public JwtAuthenticationResponse signUp(SignUpRequest request) throws BadRequestException {
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match.");
+            throw new BadRequestException("Passwords do not match.");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("Email already in use.");
+            throw new BadRequestException("Email already in use.");
         }
         try {
             var user = User
@@ -77,13 +77,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         catch (Exception e) {
             Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
             if (existingUser2.isPresent()) {
-                profileRepository.delete(existingUser2.get().getProfile());
+                if (existingUser2.get().getProfile() != null)
+                    profileRepository.delete(existingUser2.get().getProfile());
                 userRepository.delete(existingUser2.get());
             }
-            throw new RuntimeException("Error signing up.");
+            throw new RuntimeException(e.getMessage());
         }
-
-
     }
 
     @Override
@@ -94,16 +93,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new BadRequestException("Invalid password.");
         }
 
         var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse
-                .builder()
-                .token(jwt)
-                .build();
+        return JwtAuthenticationResponse.builder().token(jwt).build();
     }
 
     @Override
