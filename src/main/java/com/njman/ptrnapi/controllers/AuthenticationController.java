@@ -4,7 +4,6 @@ import com.njman.ptrnapi.daos.requests.AdminSignUpRequest;
 import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
 import com.njman.ptrnapi.daos.requests.SignInRequest;
 import com.njman.ptrnapi.daos.requests.SignUpRequest;
-import com.njman.ptrnapi.daos.responses.ErrorResponse;
 import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.services.AuthenticationService;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,7 +57,19 @@ public class AuthenticationController {
     @PostMapping("/change-password")
     public String changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordRequest request) {
         var email = user.getEmail();
-        return authenticationService.changePassword(email, request);
+        try {
+            authenticationService.changePassword(email, request);
+            return "Password changed successfully.";
+        }
+        catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+        catch (BadRequestException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @PostMapping("signup/admin")
