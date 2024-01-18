@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -26,6 +23,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
+    @ResponseStatus(HttpStatus.CREATED)
     public JwtAuthenticationResponse signUp(@RequestBody SignUpRequest request) {
         try {
             return authenticationService.signUp(request);
@@ -39,6 +37,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
+    @ResponseStatus(HttpStatus.CREATED)
     public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request) {
         try {
             return authenticationService.signIn(request);
@@ -54,7 +53,8 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/change-password")
+    @PutMapping("/change-password")
+    @ResponseStatus(HttpStatus.OK)
     public String changePassword(@AuthenticationPrincipal User user, @RequestBody ChangePasswordRequest request) {
         var email = user.getEmail();
         try {
@@ -73,6 +73,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("signup/admin")
+    @ResponseStatus(HttpStatus.CREATED)
     public JwtAuthenticationResponse adminSignUp(@RequestBody AdminSignUpRequest request) {
         try {
             return authenticationService.adminSignUp(request);
