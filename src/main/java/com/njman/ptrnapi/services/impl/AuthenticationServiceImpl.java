@@ -1,9 +1,6 @@
 package com.njman.ptrnapi.services.impl;
 
-import com.njman.ptrnapi.daos.requests.AdminSignUpRequest;
-import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
-import com.njman.ptrnapi.daos.requests.SignInRequest;
-import com.njman.ptrnapi.daos.requests.SignUpRequest;
+import com.njman.ptrnapi.daos.requests.*;
 import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 import com.njman.ptrnapi.models.Profile;
 import com.njman.ptrnapi.models.Role;
@@ -22,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -133,6 +129,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public JwtAuthenticationResponse firstSignIn(FirstSignInRequest request) {
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new NoSuchElementException("User not found."));
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse
+                .builder()
+                .token(jwt)
+                .build();
+    }
+
+    @Override
+    @Transactional
     public void changePassword(String email, ChangePasswordRequest request){
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException("User not found."));

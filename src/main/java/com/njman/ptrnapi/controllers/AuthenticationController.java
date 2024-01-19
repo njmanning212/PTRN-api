@@ -1,9 +1,6 @@
 package com.njman.ptrnapi.controllers;
 
-import com.njman.ptrnapi.daos.requests.AdminSignUpRequest;
-import com.njman.ptrnapi.daos.requests.ChangePasswordRequest;
-import com.njman.ptrnapi.daos.requests.SignInRequest;
-import com.njman.ptrnapi.daos.requests.SignUpRequest;
+import com.njman.ptrnapi.daos.requests.*;
 import com.njman.ptrnapi.daos.responses.JwtAuthenticationResponse;
 import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.services.AuthenticationService;
@@ -50,6 +47,22 @@ public class AuthenticationController {
         }
         catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect.");
+        }
+        catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @PostMapping("/signin/first")
+    public JwtAuthenticationResponse firstSignIn(@RequestBody FirstSignInRequest request) {
+        try {
+            return authenticationService.firstSignIn(request);
+        }
+        catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
