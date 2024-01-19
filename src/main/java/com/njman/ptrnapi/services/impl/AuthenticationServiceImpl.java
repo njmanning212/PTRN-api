@@ -15,14 +15,15 @@ import com.njman.ptrnapi.services.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -38,138 +39,113 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public JwtAuthenticationResponse signUp(SignUpRequest request) throws BadRequestException {
+    @Transactional
+    public JwtAuthenticationResponse signUp(SignUpRequest request){
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new BadRequestException("Passwords do not match.");
+            throw new IllegalArgumentException("Passwords do not match.");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new BadRequestException("Email already in use.");
+            throw new IllegalArgumentException("Email already in use.");
         }
-        try {
-            var user = User
-                    .builder()
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .build();
 
-            var profile = Profile
-                    .builder()
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
-                    .user(user)
-                    .role(Role.PATIENT)
-                    .build();
+        var user = User
+                .builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
 
-            user.setProfile(profile);
+        var profile = Profile
+                .builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .user(user)
+                .role(Role.PATIENT)
+                .build();
 
-            userRepository.save(user);
-            profileRepository.save(profile);
+        user.setProfile(profile);
 
-            var jwt = jwtService.generateToken(user);
-            return JwtAuthenticationResponse
-                    .builder()
-                    .token(jwt)
-                    .build();
-        }
-        catch (Exception e) {
-            Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
-            if (existingUser2.isPresent()) {
-                if (existingUser2.get().getProfile() != null)
-                    profileRepository.delete(existingUser2.get().getProfile());
-                userRepository.delete(existingUser2.get());
-            }
-            throw new RuntimeException(e.getMessage());
-        }
+        userRepository.save(user);
+        profileRepository.save(profile);
+
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse
+                .builder()
+                .token(jwt)
+                .build();
     }
 
     @Override
-    public JwtAuthenticationResponse signIn(SignInRequest request) throws BadRequestException {
+    public JwtAuthenticationResponse signIn(SignInRequest request){
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid password.");
-        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         var jwt = jwtService.generateToken(user);
         return JwtAuthenticationResponse.builder().token(jwt).build();
     }
 
     @Override
-    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) throws BadRequestException {
+    @Transactional
+    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) {
         if (!request.getAdminCode().equals(adminCode)) {
-            throw new BadRequestException("Invalid admin code.");
+            throw new IllegalArgumentException("Invalid admin code.");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new BadRequestException("Passwords do not match.");
+            throw new IllegalArgumentException("Passwords do not match.");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (existingUser.isPresent()) {
-            throw new BadRequestException("Email already in use.");
+            throw new IllegalArgumentException("Email already in use.");
         }
 
-        try {
-            var user = User
-                    .builder()
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .build();
+        var user = User
+                .builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
 
-            var profile = Profile
-                    .builder()
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
-                    .role(Role.ADMIN)
-                    .user(user)
-                    .build();
+        var profile = Profile
+                .builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .role(Role.ADMIN)
+                .user(user)
+                .build();
 
-            user.setProfile(profile);
+        user.setProfile(profile);
 
-            userRepository.save(user);
-            profileRepository.save(profile);
+        userRepository.save(user);
+        profileRepository.save(profile);
 
-            var jwt = jwtService.generateToken(user);
-            return JwtAuthenticationResponse
-                    .builder()
-                    .token(jwt)
-                    .build();
-
-        } catch (Exception e) {
-            Optional<User> existingUser2 = userRepository.findByEmail(request.getEmail());
-            if (existingUser2.isPresent()) {
-                if (existingUser2.get().getProfile() != null)
-                    profileRepository.delete(existingUser2.get().getProfile());
-                userRepository.delete(existingUser2.get());
-            }
-            throw new RuntimeException(e.getMessage());
-        }
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse
+                .builder()
+                .token(jwt)
+                .build();
 
     }
 
     @Override
-    public void changePassword(String email, ChangePasswordRequest request) throws BadRequestException {
+    public void changePassword(String email, ChangePasswordRequest request){
         var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        try {
-            authenticationManager.authenticate(
+                .orElseThrow(() -> new NoSuchElementException("User not found."));
+
+        authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, request.getOldPassword()));
-        }
-        catch (Exception e) {
-            throw new BadRequestException("Old Password is incorrect.");
-        }
 
         if (request.getNewPassword().equals(request.getOldPassword()))
-            throw new BadRequestException("New password cannot be the same as the old password.");
+            throw new IllegalArgumentException("New password cannot be the same as the old password.");
+
         if (!request.getNewPassword().equals(request.getNewPasswordConfirm()))
-            throw new BadRequestException("New passwords do not match.");
+            throw new IllegalArgumentException("New passwords do not match.");
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }

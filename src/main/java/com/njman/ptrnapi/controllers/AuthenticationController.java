@@ -12,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("ptrn/api/auth")
@@ -28,7 +31,7 @@ public class AuthenticationController {
         try {
             return authenticationService.signUp(request);
         }
-        catch (BadRequestException e) {
+        catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         catch (Exception e) {
@@ -42,11 +45,11 @@ public class AuthenticationController {
         try {
             return authenticationService.signIn(request);
         }
-        catch (IllegalArgumentException e) {
+        catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
-        catch (BadRequestException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        catch (BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect.");
         }
         catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -61,11 +64,14 @@ public class AuthenticationController {
             authenticationService.changePassword(email, request);
             return "Password changed successfully.";
         }
-        catch (IllegalArgumentException e) {
+        catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
-        catch (BadRequestException e) {
+        catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+        catch (BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Old password is incorrect.");
         }
         catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -78,7 +84,7 @@ public class AuthenticationController {
         try {
             return authenticationService.adminSignUp(request);
         }
-        catch (BadRequestException e) {
+        catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         catch (Exception e) {
