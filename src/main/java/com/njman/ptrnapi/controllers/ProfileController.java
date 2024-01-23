@@ -41,7 +41,7 @@ public class ProfileController {
         }
     }
 
-    @PostMapping("/{id}/add-photo")
+    @PutMapping("/{id}/add-photo")
     public ProfileResponse addProfilePicture(@AuthenticationPrincipal User user, @PathVariable Long id, @RequestParam("photo") MultipartFile photo) {
         try {
             return profileService.addProfilePhoto(user, id, photo);
