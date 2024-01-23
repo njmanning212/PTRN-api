@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -67,5 +68,13 @@ public class ClinicServiceImpl implements ClinicService {
                 .updatedAt(clinic.getUpdatedAt())
                 .build();
 
+    }
+
+    @Override
+    public List<Clinic> getAllClinics(User user) {
+        if (user.getProfile().getRole().getValue() != 500) {
+            throw new AuthorizationDeniedException("Must be an Admin to view all clinics!");
+        }
+        return clinicRepository.findAllByOrderByNameAsc();
     }
 }
