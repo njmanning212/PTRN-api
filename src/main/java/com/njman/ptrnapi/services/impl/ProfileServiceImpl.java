@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -90,5 +92,10 @@ public class ProfileServiceImpl implements ProfileService {
                 .role(profile.getRole())
                 .profilePhotoURL(profile.getProfilePhotoURL())
                 .build();
+    }
+
+    @Override
+    public List<Profile> getProfilesByClinicId(Long clinicId) {
+        return profileRepository.findByClinicId(clinicId);
     }
 }

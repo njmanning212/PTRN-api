@@ -1,6 +1,7 @@
 package com.njman.ptrnapi.controllers;
 
 import com.njman.ptrnapi.daos.requests.CreateClinicRequest;
+import com.njman.ptrnapi.daos.responses.ClinicResponse;
 import com.njman.ptrnapi.daos.responses.CreateClinicResponse;
 import com.njman.ptrnapi.exceptions.AuthorizationDeniedException;
 import com.njman.ptrnapi.models.Clinic;
@@ -39,6 +40,7 @@ public class ClinicController {
     }
 
     @GetMapping()
+    @ResponseStatus(HttpStatus.OK)
     public List<Clinic> getAllClinics(@AuthenticationPrincipal User user) {
         try {
             return clinicService.getAllClinics(user);
@@ -49,5 +51,11 @@ public class ClinicController {
         catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
+    }
+
+    @GetMapping("{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ClinicResponse getClinicById(@PathVariable Long id) {
+        return clinicService.getClinicById(id);
     }
 }
