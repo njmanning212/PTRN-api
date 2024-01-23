@@ -26,5 +26,8 @@ public class Profile {
     @JoinColumn(name = "user_id")
     User user;
 
+    @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL)
+    private ImageURL profilePhotoURL;
+
 }
 
