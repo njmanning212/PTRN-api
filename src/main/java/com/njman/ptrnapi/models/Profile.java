@@ -25,8 +25,11 @@ public class Profile {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "clinic_id")
+    private Clinic clinic;
 
 }
 
