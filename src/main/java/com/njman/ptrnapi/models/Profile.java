@@ -21,13 +21,12 @@ public class Profile {
     private String lastName;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String profilePhotoURL;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL)
-    private ImageURL profilePhotoURL;
 
 }
 

@@ -24,4 +24,5 @@ public class ProfileResponse {
     private String lastName;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String profilePhotoURL;
 }

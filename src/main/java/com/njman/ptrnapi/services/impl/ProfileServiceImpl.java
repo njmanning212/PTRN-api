@@ -7,16 +7,19 @@ import com.njman.ptrnapi.models.Role;
 import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.repositories.ProfileRepository;
 import com.njman.ptrnapi.repositories.UserRepository;
+import com.njman.ptrnapi.services.CloudinaryImageService;
 import com.njman.ptrnapi.services.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final CloudinaryImageService cloudinaryImageService;
 
     @Override
     @Transactional
@@ -63,5 +66,29 @@ public class ProfileServiceImpl implements ProfileService {
             case "PATIENT" -> Role.PATIENT;
             default -> throw new IllegalArgumentException("Invalid role");
         };
+    }
+
+    @Override
+    public ProfileResponse addProfilePhoto(User user, Long id, MultipartFile image) {
+        if (!user.getProfile().getId().equals(id)) {
+            throw new IllegalArgumentException("User does not own this profile");
+        }
+
+        var profile = profileRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+
+        var imageUrl = cloudinaryImageService.uploadImage(image);
+
+        profile.setProfilePhotoURL(imageUrl);
+        profileRepository.save(profile);
+
+        return ProfileResponse
+                .builder()
+                .id(profile.getId())
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .role(profile.getRole())
+                .profilePhotoURL(profile.getProfilePhotoURL())
+                .build();
     }
 }
