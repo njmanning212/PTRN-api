@@ -1,5 +1,6 @@
 package com.njman.ptrnapi.services.impl;
 
+import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.services.JwtService;
 
 import io.jsonwebtoken.Claims;
@@ -31,8 +32,8 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(User user) {
+        return generateToken(new HashMap<>(), user);
     }
 
     @Override
@@ -60,11 +61,12 @@ public class JwtServiceImpl implements JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private String generateToken(Map<String, Objects> extraClaims, UserDetails userDetails) {
+    private String generateToken(Map<String, Objects> extraClaims, User user) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .claim("userProfileId", user.getProfile().getId())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
