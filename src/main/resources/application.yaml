@@ -32,5 +32,9 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 
+cors:
+  allowed:
+    origin: ${CORS_ALLOWED_ORIGIN}
+
 spring.config.import: file:env.properties
 
