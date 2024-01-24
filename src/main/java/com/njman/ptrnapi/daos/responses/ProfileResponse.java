@@ -25,4 +25,5 @@ public class ProfileResponse {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String profilePhotoURL;
+    private Long clinicId;
 }

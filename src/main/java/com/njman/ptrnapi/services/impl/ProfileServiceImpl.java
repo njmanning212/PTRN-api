@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -97,5 +99,28 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public List<Profile> getProfilesByClinicId(Long clinicId) {
         return profileRepository.findByClinicId(clinicId);
+    }
+
+    public ProfileResponse getProfileById(Long id) {
+        Optional<Profile> existingProfile =  profileRepository.findById(id);
+        if (existingProfile.isEmpty()) {
+            throw new NoSuchElementException("Profile not found");
+        }
+        var profile = existingProfile.get();
+
+        var profileResponse =  ProfileResponse
+                .builder()
+                .id(profile.getId())
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .role(profile.getRole())
+                .profilePhotoURL(profile.getProfilePhotoURL())
+                .build();
+
+        if (profile.getClinic() != null) {
+            profileResponse.setClinicId(profile.getClinic().getId());
+        }
+
+        return profileResponse;
     }
 }

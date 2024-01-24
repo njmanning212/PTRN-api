@@ -14,4 +14,5 @@ public class CreateProfileRequest {
     private String lastName;
     private String email;
     private String stringRole;
+    private Long clinicId;
 }
