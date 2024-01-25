@@ -95,49 +95,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional
-    public JwtAuthenticationResponse adminSignUp(AdminSignUpRequest request) {
-        if (!request.getAdminCode().equals(adminCode)) {
-            throw new IllegalArgumentException("Invalid admin code.");
-        }
-
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Passwords do not match.");
-        }
-
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Email already in use.");
-        }
-
-        var user = User
-                .builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
-
-        var profile = Profile
-                .builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .role(Role.ADMIN)
-                .user(user)
-                .build();
-
-        user.setProfile(profile);
-
-        userRepository.save(user);
-        profileRepository.save(profile);
-
-        var jwt = jwtService.generateToken(user);
-        return JwtAuthenticationResponse
-                .builder()
-                .token(jwt)
-                .build();
-
-    }
-
-    @Override
     public JwtAuthenticationResponse firstSignIn(FirstSignInRequest request) {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new NoSuchElementException("User not found."));

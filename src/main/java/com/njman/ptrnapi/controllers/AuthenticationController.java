@@ -7,7 +7,6 @@ import com.njman.ptrnapi.services.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -91,17 +90,4 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("signup/admin")
-    @ResponseStatus(HttpStatus.CREATED)
-    public JwtAuthenticationResponse adminSignUp(@RequestBody AdminSignUpRequest request) {
-        try {
-            return authenticationService.adminSignUp(request);
-        }
-        catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-        catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
 }
