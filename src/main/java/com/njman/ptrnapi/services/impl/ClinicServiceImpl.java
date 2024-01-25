@@ -22,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClinicServiceImpl implements ClinicService {
     private final ClinicRepository clinicRepository;
-    private final ProfileService profileService;
     @Override
     public CreateClinicResponse createClinic(User user, CreateClinicRequest request) {
         if (user.getProfile().getRole().getValue() != 500) {
@@ -84,14 +83,7 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     public ClinicResponse getClinicById(Long id) {
 
-        Optional<Clinic> existingClinic = clinicRepository.findById(id);
-
-        if (existingClinic.isEmpty()) {
-            throw new NoSuchElementException("Clinic with id " + id + " does not exist!");
-        }
-
-        Clinic clinic = existingClinic.get();
-        List<Profile> profiles = profileService.getProfilesByClinicId(id);
+        var clinic = getClinicEntityById(id);
 
         return ClinicResponse
                 .builder()
@@ -105,7 +97,19 @@ public class ClinicServiceImpl implements ClinicService {
                 .einNumber(clinic.getEinNumber())
                 .createdAt(clinic.getCreatedAt())
                 .updatedAt(clinic.getUpdatedAt())
-                .profiles(profiles)
                 .build();
     }
+
+    @Override
+    public Clinic getClinicEntityById(Long id) {
+        Optional<Clinic> existingClinic = clinicRepository.findById(id);
+
+        if (existingClinic.isEmpty()) {
+            throw new NoSuchElementException("Clinic with id " + id + " does not exist!");
+        }
+
+        return existingClinic.get();
+    }
+
+
 }

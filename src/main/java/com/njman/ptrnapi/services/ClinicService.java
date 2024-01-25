@@ -7,9 +7,11 @@ import com.njman.ptrnapi.models.Clinic;
 import com.njman.ptrnapi.models.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ClinicService {
     CreateClinicResponse createClinic(User user, CreateClinicRequest request);
     List<Clinic> getAllClinics(User user);
     ClinicResponse getClinicById(Long id);
+    Clinic getClinicEntityById(Long id);
 }

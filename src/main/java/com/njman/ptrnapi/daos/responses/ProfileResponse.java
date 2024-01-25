@@ -12,18 +12,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileResponse {
-    @Id
-    @GeneratedValue
     private Long id;
     private String firstName;
     private String lastName;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private String email;
+    private String roleString;
+    private Integer roleValue;
     private String profilePhotoURL;
     private Long clinicId;
+    private Date createdAt;
+    private Date updatedAt;
 }

@@ -1,5 +1,7 @@
 package com.njman.ptrnapi.services.impl;
 
+import com.njman.ptrnapi.models.Profile;
+import com.njman.ptrnapi.models.User;
 import com.njman.ptrnapi.repositories.ProfileRepository;
 import com.njman.ptrnapi.repositories.UserRepository;
 import com.njman.ptrnapi.services.UserService;
@@ -15,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final ProfileRepository profileRepository;
 
     @Override
     public UserDetailsService userDetailsService() {
@@ -27,5 +28,37 @@ public class UserServiceImpl implements UserService {
             }
         };
     }
+
+    @Override
+    public User createUserFromEmail(String email) {
+        var user = User
+                .builder()
+                .email(email)
+                .build();
+
+        return userRepository.save(user);
+
+    }
+
+    @Override
+    public void isExistingUser(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+    }
+
+    @Override
+    public void addProfileToUser(User user, Profile profile) {
+        user.setProfile(profile);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void validateUserOwnsProfile(User user, Long profileId) {
+        if (!user.getProfile().getId().equals(profileId)) {
+            throw new IllegalArgumentException("User does not own this profile");
+        }
+    }
+
 
 }

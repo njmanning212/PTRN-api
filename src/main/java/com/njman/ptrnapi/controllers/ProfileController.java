@@ -27,11 +27,7 @@ public class ProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProfileResponse createProfile(@AuthenticationPrincipal User user, @RequestBody CreateProfileRequest request) {
         try {
-            if (user.getProfile().getRole().getValue() < profileService.determineRole(request.getStringRole()).getValue()) {
-                throw new AuthorizationDeniedException("You are not authorized to create this user!");
-            }
-
-            return profileService.createProfile(request);
+            return profileService.createProfile(user, request);
         }
         catch (AuthorizationDeniedException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage(), e);

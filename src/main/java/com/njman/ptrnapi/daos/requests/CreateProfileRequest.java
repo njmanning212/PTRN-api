@@ -13,6 +13,6 @@ public class CreateProfileRequest {
     private String firstName;
     private String lastName;
     private String email;
-    private String stringRole;
+    private String roleString;
     private Long clinicId;
 }

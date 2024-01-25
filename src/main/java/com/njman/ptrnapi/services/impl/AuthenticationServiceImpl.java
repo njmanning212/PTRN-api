@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -38,14 +39,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public JwtAuthenticationResponse signUp(SignUpRequest request){
 
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Passwords do not match.");
-        }
-
-        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already in use.");
         }
+
+        Date now = new Date();
 
         var user = User
                 .builder()
@@ -57,9 +55,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .createdAt(now)
+                .updatedAt(now)
                 .user(user)
-                .role(Role.PATIENT)
                 .build();
+
+        if (request.getIsAdmin()) {
+            validateAdminCode(request.getAdminCode());
+            profile.setRole(Role.ADMIN);
+        }
+        else {
+            profile.setRole(Role.PATIENT);
+        }
 
         user.setProfile(profile);
 
@@ -164,5 +173,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    private void validateAdminCode(String adminCode) {
+        if (!adminCode.equals(this.adminCode)) {
+            throw new IllegalArgumentException("Invalid admin code.");
+        }
     }
 }

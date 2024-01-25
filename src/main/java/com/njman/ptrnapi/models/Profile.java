@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @Entity
@@ -19,9 +21,13 @@ public class Profile {
     private Long id;
     private String firstName;
     private String lastName;
+    private String email;
+    private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private Role role;
     private String profilePhotoURL;
+    private Date createdAt;
+    private Date updatedAt;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "user_id")

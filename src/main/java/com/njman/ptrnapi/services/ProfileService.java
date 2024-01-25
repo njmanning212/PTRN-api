@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProfileService {
-    ProfileResponse createProfile(CreateProfileRequest request);
+    ProfileResponse createProfile(User user, CreateProfileRequest request);
     Role determineRole(String stringRole);
     ProfileResponse addProfilePhoto(User user, Long id, MultipartFile image);
     List<Profile> getProfilesByClinicId(Long clinicId);
