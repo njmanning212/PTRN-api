@@ -23,7 +23,7 @@ public class ProfileResponse {
     private String firstName;
     private String lastName;
     private String email;
-    private String roleString;
+    private String roleName;
     private Integer roleValue;
     private String profilePhotoURL;
     private Long clinicId;
