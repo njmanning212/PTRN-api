@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -83,7 +82,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public JwtAuthenticationResponse signIn(SignInRequest request){
+    public JwtAuthenticationResponse login(LoginRequest request){
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 

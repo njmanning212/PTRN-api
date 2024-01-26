@@ -71,7 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .firstName(newProfile.getFirstName())
                 .email(request.getEmail())
                 .lastName(newProfile.getLastName())
-                .roleString(request.getRoleString())
+                .roleName(request.getRoleString())
                 .roleValue(newProfile.getRole().getValue())
                 .build();
     }
@@ -127,6 +127,12 @@ public class ProfileServiceImpl implements ProfileService {
                 .id(profile.getId())
                 .firstName(profile.getFirstName())
                 .lastName(profile.getLastName())
+                .email(profile.getEmail())
+                .phoneNumber(profile.getPhoneNumber())
+                .roleName(profile.getRole().getName())
+                .roleValue(profile.getRole().getValue())
+                .createdAt(profile.getCreatedAt())
+                .updatedAt(profile.getUpdatedAt())
                 .profilePhotoURL(profile.getProfilePhotoURL())
                 .build();
 

@@ -35,11 +35,11 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     @ResponseStatus(HttpStatus.CREATED)
-    public JwtAuthenticationResponse signIn(@RequestBody SignInRequest request) {
+    public JwtAuthenticationResponse login(@RequestBody LoginRequest request) {
         try {
-            return authenticationService.signIn(request);
+            return authenticationService.login(request);
         }
         catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
